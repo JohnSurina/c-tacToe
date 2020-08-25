@@ -3,23 +3,30 @@
 #include "ticTacDefinitions.c"
 
 #define MAP_PLAYER_TOKEN(a,b,c) (!(a) ? ' ' : ((a == 1) ? b : c)) // Map a to b if a is 1, c if a is 2, and a space otherwise
+#define SWAP_PLAYER_TURN(a) (a == 1) ? 2 : 1 // Switch 1 to 2, and vise versa
 
+/**
+ * Prompt a user to provide a character to act as their token.
+ */
 void promptForToken(char playerNumber, char* playerTokenPointer){
     printf("Player %c, please enter a single character for your player token: ", playerNumber);
     scanf("\n%c", playerTokenPointer);
-    printf("Player %c's token is set to: %d\n\n", playerNumber, *playerTokenPointer);
+    //printf("Player %c's token is set to: %d\n\n", playerNumber, *playerTokenPointer); This line checks the token signature.
 }
 
+/**
+ * AFTER prompting the user for a move, collect the
+ * value that the player wishes. return the slot on
+ * the game board. This function will loop while
+ * the input is invalid.
+ */
 int* collectMove(TicTacToeBoard board){
     while(1){
         char move[3];
         scanf("\n%2c", move);
         move[2] = 0;
         
-        if (strcmp(move, "TL") == 0){
-            printf("THIS IS THE VALUE COLLECTED AT COLLECTMOVE: %d", *board.TL);
-            return board.TL;
-        }
+        if (strcmp(move, "TL") == 0) return board.TL;
         if (strcmp(move, "TM") == 0) return board.TM;
         if (strcmp(move, "TR") == 0) return board.TR;
         if (strcmp(move, "ML") == 0) return board.ML;
@@ -32,9 +39,13 @@ int* collectMove(TicTacToeBoard board){
         printf("The selected move was invalid, please enter a value from the following list\n\
                 (TL, TM, TR, ML, MM, MR, BL, BM, BR)\n");
     }
-
 }
 
+/**
+ * Make a prompt for whether the players would like to 
+ * continue playing or not. Return 1 if they want to continue,
+ * return 0 otherwise.
+ */
 int checkIfPlayersWantToKeepPlaying(){
     char playAgainMarker;
     printf("Play again? (y/n):");
@@ -46,18 +57,22 @@ int checkIfPlayersWantToKeepPlaying(){
     return 1;
 }
 
+/**
+ * Map the characters provided for players 1 and 2 to
+ * the values in their tic tac toe board.
+ */
 void collectCharacters(char charArray[9], TicTacToeBoard board, char p1, char p2){
-    printf("\nDEBUG DDDD: %d\n", *board.TL);
-    printf("\nDEBUG LEN(board.ticTacToeArray = %ld\n", LEN(board.ticTacToeArray));
     for (int i = 0; i < (int)LEN(board.ticTacToeArray); i++){
         int value = board.ticTacToeArray[i];
-        printf("value i = %d : %d\n", i, value);
         charArray[i] = MAP_PLAYER_TOKEN(value, p1, p2);
-    }
-   printf("\nDEBUG EEEE: %d\n", *board.TL);
-    
+    }    
 }
 
+/**
+ * Print out the tic tac toe board in ascii characters.
+ * This function is necessary to map the provided player tokens
+ * (characters) to their integer values on the tic tac toe board.
+ */
 void printBoard(TicTacToeBoard board, char p1, char p2){
     char bchar[LEN(board.ticTacToeArray)];
     collectCharacters(bchar, board, p1, p2);
@@ -69,9 +84,11 @@ void printBoard(TicTacToeBoard board, char p1, char p2){
     printf("-------------\n");
     printf("| %c | %c | %c |\n", bchar[6], bchar[7], bchar[8]);
     printf("-------------\n\n");
-
 }
 
+/**
+ * This Function is the primary game loop. 
+ */
 int playGame(){
     int stillPlaying = 1;
     TicTacToeBoard playBoard;
@@ -82,24 +99,20 @@ int playGame(){
     promptForToken('1', &player1Token);
     promptForToken('2', &player2Token);
     
-    while(stillPlaying){
+    while(stillPlaying){ // This loop accounts for multiple plays
 
         initializeTicTacToeBoard(&playBoard);
-        printf("\nDEBUG BBBB: %d\n", *playBoard.TL);
 
         int winner = 0;
         int playerTurn = 1;
         
-        while(!winner){
+        while(!winner){ // This is an inter-game loop.
             int* boardMovePosition;
-
-            printf("\nDEBUG CCCC: %d\n", *playBoard.TL);
 
             printBoard(playBoard, player1Token, player2Token);
             printf("Player %d, please enter your move.\nValid moves are (TL, TM, TR, ML, MM, MR, BL, BM, BR)\n", playerTurn);
 
             while(1){
-                printf("\nDEBUG AAAA: %d\n", *playBoard.TL);
                 boardMovePosition = collectMove(playBoard);
 
                 if( makeMoveSafely(boardMovePosition, playerTurn) ) break;
@@ -108,17 +121,23 @@ int playGame(){
                 printBoard(playBoard, player1Token, player2Token);
             }
 
-            playerTurn = (playerTurn == 1) ? 2 : 1;
+            playerTurn = SWAP_PLAYER_TURN(playerTurn);
 
             winner = checkForWinningCondition(playBoard);
         }
 
-        printf("Player %d wins!\n", winner);
+        printBoard(playBoard, player1Token, player2Token);
+
+        if(winner != 3){
+            printf("Player %d wins!\n", winner);
+        } else {
+            printf("Its a draw!\n");
+        }
 
         stillPlaying = checkIfPlayersWantToKeepPlaying();
         
     }
 
-    printf("Thank you for playing!");
+    printf("Thank you for playing!\n\n");
     return(0);
 }
