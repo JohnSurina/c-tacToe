@@ -1,7 +1,9 @@
 
-#define checkEqual(a, b, c) if((*a == *b) && (*b == *c)) return *a
 #ifndef TIC_TAC_DEFINITIONS
 #define TIC_TAC_DEFINITIONS 1
+
+#define checkEqual(a, b, c) if((*a == *b) && (*b == *c)) return *a
+#define LEN(x) sizeof(x) / sizeof(x[0])
 
 typedef struct ticTacToeBoard TicTacToeBoard;
 
@@ -19,24 +21,23 @@ struct ticTacToeBoard {
     int* BR;
 };
 
-TicTacToeBoard constructTicTacToeBoard(){
-    printf("debug marker -1");
-    TicTacToeBoard boardReturn;
+void initializeTicTacToeBoard(TicTacToeBoard * board){
 
-    for (int i = 0; i < sizeof(boardReturn.ticTacToeArray); i++){
-        printf("debug marker 0 : %d", i);
-        boardReturn.ticTacToeArray[i] = 0;
+    for (int i = 0; i < LEN(board->ticTacToeArray); i++){
+        board->ticTacToeArray[i] = 0;
     }
 
-    boardReturn.TL = &(boardReturn.ticTacToeArray[0]);
-    boardReturn.TM = &(boardReturn.ticTacToeArray[1]);
-    boardReturn.TR = &(boardReturn.ticTacToeArray[2]);
-    boardReturn.ML = &(boardReturn.ticTacToeArray[3]);
-    boardReturn.MM = &(boardReturn.ticTacToeArray[4]);
-    boardReturn.MR = &(boardReturn.ticTacToeArray[5]);
-    boardReturn.BL = &(boardReturn.ticTacToeArray[6]);
-    boardReturn.BM = &(boardReturn.ticTacToeArray[7]);
-    boardReturn.BR = &(boardReturn.ticTacToeArray[8]);
+    board->TL = &(board->ticTacToeArray[0]);
+    board->TM = &(board->ticTacToeArray[1]);
+    board->TR = &(board->ticTacToeArray[2]);
+    board->ML = &(board->ticTacToeArray[3]);
+    board->MM = &(board->ticTacToeArray[4]);
+    board->MR = &(board->ticTacToeArray[5]);
+    board->BL = &(board->ticTacToeArray[6]);
+    board->BM = &(board->ticTacToeArray[7]);
+    board->BR = &(board->ticTacToeArray[8]);
+
+    return;
 }
 
 int checkForWinningCondition(TicTacToeBoard boardState){
@@ -63,6 +64,7 @@ void makeMove(int* boardPointer, int player){
  */
 int makeMoveSafely(int* boardPointer, int player){
     if (*boardPointer){
+        printf("\n I MADE IT HERE: %d\n", *boardPointer);
         return(0);
     } else {
         makeMove(boardPointer, player);
